@@ -43,7 +43,7 @@ public class Resources {
         }
 
         textures.put("ground", ground);
-        textures.put("character", character);
+        textures.put("charMain", character);
         textures.put("path", path1);
         textures.put("path2", path2);
 
@@ -51,6 +51,10 @@ public class Resources {
     }
 
     public Image getTexture(String id){
+
+        if (id.contains("fill")){
+            return null;
+        }
 
         return textures.get(id);
 

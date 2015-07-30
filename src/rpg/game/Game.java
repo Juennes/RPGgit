@@ -15,7 +15,9 @@ import java.io.IOException;
  */
 public class Game extends Canvas {
 
-    private Tile[][][] world;
+    private final int cellSize = 45;
+
+    private World world;
 
     private Entity[] entities;
 
@@ -50,11 +52,11 @@ public class Game extends Canvas {
 
     public Game(InputHandler input) {
         // voorlopig nog arbitreir
-        world = new Tile[30][30][3];
+        world = new World(60, 60);
 
-        for (int i = 0; i < world.length; i++) {
-            for (int j = 0; j < world[0].length; j++) {
-                world[i][j][0] = new Ground();
+        for (int i = 0; i < world.getHeight(); i++) {
+            for (int j = 0; j < world.getWidth(); j++) {
+                world.add(new Ground(), i, j);
             }
         }
 
@@ -62,34 +64,34 @@ public class Game extends Canvas {
 
         // world[15][15][1] = character;
 
-        world[4][17][1] = new Character("henk", false, 0, new Richting().UP);
+        world.add(new Character("henk", false, 0, new Richting().UP), 32, 7);
 
-        world[9][2][1] = new Character("henk", false, 0, new Richting().UP);
+        world.add(new Character("henk", false, 0, new Richting().UP), 45, 8);
 
-        world[25][17][1] = new Character("henk", false, 0, new Richting().UP);
+        world.add(new Character("henk", false, 0, new Richting().UP), 12, 56);
 
-        world[12][12][0] = new Path();
-        world[13][12][0] = new Path();
+        world.add( new Path(), 26, 35);
+        world.add(new Path(), 25, 35);
 
         entities = new Entity[1];
 
         entities[0] = character;
 
         // fix hier nog iets mooier
-        setMinimumSize(new Dimension(90 * 17, 90 * 9));
-        setMaximumSize(new Dimension(90 * 17, 90 * 9));
-        setPreferredSize(new Dimension(90 * 17, 90 * 9));
+        setMinimumSize(new Dimension(cellSize * 17, cellSize * 9));
+        setMaximumSize(new Dimension(cellSize * 17, cellSize * 9));
+        setPreferredSize(new Dimension(cellSize * 17, cellSize * 9));
         setBackground(Color.black);
 
         isMoving = false;
 
-        charPosScreenX = 90 * 8;
-        charPosScreenY = 90 * 4;
+        charPosScreenX = cellSize * 8;
+        charPosScreenY = cellSize * 4;
 
         x = 15 - 8;
         y = 15 - 4;
 
-        image = new BufferedImage(90 * 17, 90 * 9, BufferedImage.TYPE_INT_RGB);
+        image = new BufferedImage(cellSize * 17, cellSize * 9, BufferedImage.TYPE_INT_RGB);
 
         res = new Resources();
 
@@ -123,9 +125,9 @@ public class Game extends Canvas {
             createBufferStrategy(2);
             return;
         }
-        int clipX = -90;
+        int clipX = -cellSize;
 
-        int clipY = -90;
+        int clipY = -cellSize;
         int dy = 0;
         int dx = 0;
         Graphics2D gf = image.createGraphics();
@@ -135,16 +137,16 @@ public class Game extends Canvas {
             for (int j = y-1; j < y + 9 + 1; j++) {
                 for (int k = 0; k < 3; k++) {
 
-                    if (i >= 0 && i<world.length && j >= 0 && j < world[0].length){
+                    if (i >= 0 && i<world.getHeight() && j >= 0 && j < world.getWidth()){
 
-                        Tile object = world[i][j][k];
+                        Tile object = world.getLayers(j, i)[k];
 
                         dx = 0;
                         dy = 0;
 
                         if (object != null) {
                             //System.out.println(world[i][j][k].getId());
-                            Image text = res.getTexture(world[i][j][k].getId());
+                            Image text = res.getTexture(object.getId());
 
                             if (object instanceof Entity) {
                                 dy = ((Entity) object).offSet()[1];
@@ -158,13 +160,13 @@ public class Game extends Canvas {
 
                     }
                 }
-                clipX += 90;
+                clipX += cellSize;
             }
-            clipX = -90;
-            clipY += 90;
+            clipX = -cellSize;
+            clipY += cellSize;
         }
-
-        gf.drawImage(res.getTexture(character.getId()), 8*90, 4*90, null);
+        // karakter toevoegen
+        gf.drawImage(res.getTexture("charMain"), 8*cellSize, 4*cellSize, null);
         gf.dispose();
         Graphics g = bs.getDrawGraphics();
         g.drawImage(image, 0, 0, null);
@@ -242,12 +244,12 @@ public class Game extends Canvas {
             xMoves += movingDir[0]*SPEED;
             yMoves += movingDir[1]*SPEED;
 
-            if (Math.abs(xMoves) >= 90){
+            if (Math.abs(xMoves) >= 45){
                 isMoving = false;
                 x -= Math.signum(xMoves);
                 xMoves = 0;
             }
-            if (Math.abs(yMoves) >= 90){
+            if (Math.abs(yMoves) >= 45){
                 isMoving = false;
                 y -= Math.signum(yMoves);
                 yMoves = 0;
