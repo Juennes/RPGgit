@@ -52,7 +52,7 @@ public class Game extends Canvas {
 
     public Game(InputHandler input) {
         // voorlopig nog arbitreir
-        world = new World(60, 60);
+        world = new World(10, 10);
 
         for (int i = 0; i < world.getHeight(); i++) {
             for (int j = 0; j < world.getWidth(); j++) {
@@ -60,19 +60,12 @@ public class Game extends Canvas {
             }
         }
 
-        character = new Character("Jon Sneu", false, 3, new Richting().DOWN);
+        character = new Character("Jon Sneu", 4, 3);
 
-        // world[15][15][1] = character;
-
-        world.add(new Character("henk", false, 0, new Richting().UP), 32, 7);
-
-        world.add(new Character("henk", false, 0, new Richting().UP), 45, 8);
-
-        world.add(new Character("henk", false, 0, new Richting().UP), 12, 56);
-
-        world.add( new Path(), 26, 35);
-        world.add(new Path(), 25, 35);
-
+        world.add( new Path(), 1, 3);
+        world.add(new Path(), 1, 4);
+        world.add(new Character("henk", 2,3), 2, 3);
+        world.add(character, 4,3);
         entities = new Entity[1];
 
         entities[0] = character;
@@ -88,8 +81,8 @@ public class Game extends Canvas {
         charPosScreenX = cellSize * 8;
         charPosScreenY = cellSize * 4;
 
-        x = 15 - 8;
-        y = 15 - 4;
+        x = character.X-8;
+        y = character.Y-4;
 
         image = new BufferedImage(cellSize * 17, cellSize * 9, BufferedImage.TYPE_INT_RGB);
 
@@ -122,7 +115,7 @@ public class Game extends Canvas {
 
         BufferStrategy bs = getBufferStrategy();
         if (bs == null) {
-            createBufferStrategy(2);
+            createBufferStrategy(1);
             return;
         }
         int clipX = -cellSize;
@@ -133,13 +126,13 @@ public class Game extends Canvas {
         Graphics2D gf = image.createGraphics();
         gf.setColor(Color.black);
         gf.fillRect(0,0,this.getWidth(), this.getHeight());
-        for (int i = x-1; i < x + 17 + 1; i++) {
-            for (int j = y-1; j < y + 9 + 1; j++) {
-                for (int k = 0; k < 3; k++) {
+        for (int k=0; k<3; k++) {
+            for (int i = x-1; i < x + 17 + 1; i++) {
+                for (int j = y-1; j < y + 9 + 1; j++) {
 
                     if (i >= 0 && i<world.getHeight() && j >= 0 && j < world.getWidth()){
 
-                        Tile object = world.getLayers(j, i)[k];
+                        Tile object = world.getLayers(i, j)[k];
 
                         dx = 0;
                         dy = 0;
@@ -159,14 +152,17 @@ public class Game extends Canvas {
                         }
 
                     }
+                    clipX += cellSize;
                 }
-                clipX += cellSize;
+                clipX = -cellSize;
+                clipY += cellSize;
             }
             clipX = -cellSize;
-            clipY += cellSize;
+            clipY = -cellSize;
+
         }
         // karakter toevoegen
-        gf.drawImage(res.getTexture("charMain"), 8*cellSize, 4*cellSize, null);
+        //gf.drawImage(res.getTexture("charMain"), 8*cellSize, 4*cellSize, null);
         gf.dispose();
         Graphics g = bs.getDrawGraphics();
         g.drawImage(image, 0, 0, null);
@@ -207,7 +203,8 @@ public class Game extends Canvas {
 
             if (System.currentTimeMillis() - lastTimer >= 1000) {
                 lastTimer += 1000;
-                System.out.println("ticks: " + ticks + " frames: " + frames);
+                //System.out.println("ticks: " + ticks + " frames: " + frames);
+                System.out.println(character.X + "  " + character.Y);
                 frames = 0;
                 ticks = 0;
             }
@@ -220,24 +217,40 @@ public class Game extends Canvas {
         if (!isMoving){
 
             if (input.right){
-                isMoving = true;
-                System.out.println("right");
                 movingDir = new Richting().LEFT;
+                character.setRichting(movingDir);
+                if (character.movePossible(world)){
+                    isMoving = true;
+                    System.out.println("right");
+                    character.moveTo();
+                }
             }
             else if (input.left){
-                isMoving = true;
-                System.out.println("left");
                 movingDir = new Richting().RIGHT;
+                character.setRichting(movingDir);
+                if (character.movePossible(world)){
+                    isMoving = true;
+                    System.out.println("left");
+                    character.moveTo();
+                }
             }
             else if (input.up){
-                isMoving = true;
-                System.out.println("up");
                 movingDir = new Richting().DOWN;
+                character.setRichting(movingDir);
+                if (character.movePossible(world)){
+                    isMoving = true;
+                    System.out.println("up");
+                    character.moveTo();
+                }
             }
             else if (input.down){
-                isMoving = true;
-                System.out.println("down");
                 movingDir = new Richting().UP;
+                character.setRichting(movingDir);
+                if (character.movePossible(world)){
+                    isMoving = true;
+                    System.out.println("down");
+                    character.moveTo();
+                }
             }
         }
         else {
@@ -248,13 +261,16 @@ public class Game extends Canvas {
                 isMoving = false;
                 x -= Math.signum(xMoves);
                 xMoves = 0;
+                world.move(character);
             }
             if (Math.abs(yMoves) >= 45){
                 isMoving = false;
                 y -= Math.signum(yMoves);
                 yMoves = 0;
+                world.move(character);
             }
         }
-
     }
+
+    
 }

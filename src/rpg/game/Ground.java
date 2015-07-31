@@ -5,7 +5,14 @@ package rpg.game;
  */
 public class Ground implements Tile {
 
+    @Override
+    public boolean canPass() {
+        return true;
+    }
+
     public String getId(){
         return "ground";
     }
+
+    public int getLayer(){return 0;}
 }

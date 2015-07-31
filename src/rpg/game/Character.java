@@ -7,12 +7,8 @@ public class Character extends Entity {
 
     private String name;
 
-    public int X;
-
-    public int Y;
-
-    public Character (String name, boolean moving, int SPEED, int[] richting){
-        super("char", 4, moving, SPEED, richting);
+    public Character (String name, int X, int Y){
+        super("char", 2, X, Y);
 
         this.name = name;
     }
@@ -26,8 +22,7 @@ public class Character extends Entity {
 
     public void moveTo(){
 
-        X += richting[0];
-        Y += richting[1];
-
+        X -= richting[0];
+        Y -= richting[1];
     }
 }

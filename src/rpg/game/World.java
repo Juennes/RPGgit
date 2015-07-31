@@ -28,13 +28,28 @@ public class World {
         int size = entity.getSize();
 
         Tile[][] tiles = entity.getRepr();
-        // check if possible
         for (int i = 0; i<size; i++){
             for (int j=0; j<size; j++){
-                wereld[y+i][x+j][1] = tiles[i][j];
+                System.out.println(tiles[i][j].getId()+"  "+tiles[i][j].getLayer());
+                wereld[y+i][x+j][tiles[i][j].getLayer()] = tiles[i][j];
             }
         }
 
+    }
+
+    public void move(Character c){
+
+        int x = c.X;
+        int y = c.Y;
+        int size = c.getSize();
+
+        for (int i = 0; i<size; i++){
+            for (int j=0; j<size; j++){
+                wereld[y+c.getRichting()[1]+i][x+c.getRichting()[0]+j][2] = null;
+            }
+        }
+
+        add(c, x, y);
     }
 
     public int getHeight() {
@@ -46,6 +61,9 @@ public class World {
     }
 
     public Tile[] getLayers(int x, int y){
-        return wereld[y][x];
+        if (x < width && y < height && y >= 0 && x >= 0){
+            return wereld[y][x];
+        }
+        else return null;
     }
 }

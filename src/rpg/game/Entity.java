@@ -4,6 +4,10 @@ package rpg.game;
  * Created by Juennes on 29/07/2015.
  */
 public class Entity {
+    
+    public int X;
+    
+    public int Y;
 
     private int offSetX;
 
@@ -21,27 +25,30 @@ public class Entity {
 
     // private String name;
 
-    public Entity(String id, int size, boolean moving, int SPEED, int[] richting) {
+    public Entity(String id, int size, int X, int Y) {
 
         this.size = size;
         offSetX = 0;
         offSetY = 0;
+        this.X = X;
+        this.Y = Y;
         // this.name = name;
         this.moving = moving;
         this.SPEED = SPEED;
         this.richting = richting;
         // meerdere tegels vullen
-        repr = new Tile[4][4];
+        repr = new Tile[size][size];
         // main tegel
-        repr[size-1][size-1] = new EntityTile(id, true);
-        for (int i = 0; i<4; i++){
-            for (int j = 0; j<4; j++){
-                if (i != size-1||j!=size-1){
-                    repr[i][j] = new EntityTile(id, false);
+
+        for (int i = 1; i<size; i++){
+            for (int j = 0; j<size; j++){
+                if (i != 0||j!=0){
+                    repr[i][j] = new EntityTile(id, false, true,1);
                 }
             }
         }
-
+        repr[0][0] = new EntityTile(id, true, false, 2);
+        repr[0][1] = new EntityTile(id,false, false, 2);
     }
 
     public void setMoving(){
@@ -100,5 +107,25 @@ public class Entity {
 
         int [] off = {offSetX, offSetY};
         return off;
+    }
+
+    public boolean movePossible(World world){
+
+        int verderZien = 0;
+
+        // kijken hoever er gecheckt moet worden
+        if (richting.equals(new Richting().RIGHT)){
+            verderZien = size-1;
+        }
+
+        if (X-richting[0] < 0 || X-richting[0] - verderZien >= world.getWidth() || Y-richting[1] < 0 || Y-richting[1] >= world.getHeight()){
+            return false;
+        }
+
+        if (world.getLayers(X-richting[0]-verderZien, Y-richting[1])[2] != null){
+            System.out.println(world.getLayers(X-richting[0]-verderZien, Y-richting[1])[2].getId());
+            return world.getLayers(X-richting[0]-verderZien, Y-richting[1])[2].canPass();
+        }
+        else return true;
     }
 }
